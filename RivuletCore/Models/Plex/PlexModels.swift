@@ -356,6 +356,8 @@ nonisolated struct PlexMedia: Codable, Sendable {
     let container: String?
     let videoFrameRate: String?
     let Part: [PlexPart]?
+    /// Unix time Plex marked the file missing; nil for a file that is there.
+    var deletedAt: Int? = nil
     // Photo EXIF, on item requests: "f/1.6", "1/5", and ISO as a string. Lenient, as every video shares this type.
     var make: PlexLenientText? = nil
     var model: PlexLenientText? = nil
