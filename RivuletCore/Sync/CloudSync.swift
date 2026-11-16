@@ -42,12 +42,12 @@ final class CloudSync: ObservableObject {
     private lazy var vault = AccountVault()
     private lazy var coordinator = AccountSyncCoordinator(vault: vault, kinds: Self.accountKinds)
 
-    /// Off until this device turns it on.
-    var isEnabled: Bool { defaults.bool(forKey: SyncCatalog.enabledKey) }
+    /// Always off in Kai's build: it has no iCloud entitlement, and creating the CloudKit container
+    /// without one traps (see AccountVault). The settings row is hidden too.
+    var isEnabled: Bool { false }
 
     func setEnabled(_ enabled: Bool) {
-        defaults.set(enabled, forKey: SyncCatalog.enabledKey)
-        enabled ? activate() : deactivate()
+        deactivate()
     }
 
     /// Call once at launch, after the host has set its hooks.
