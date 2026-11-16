@@ -358,6 +358,8 @@ nonisolated struct PlexMedia: Codable, Sendable {
     let Part: [PlexPart]?
     /// A version the server still lists but whose file is gone (known only after `checkFiles=1`).
     var isMissing: Bool { Part?.contains { $0.exists == false || $0.accessible == false } == true }
+    /// Unix time Plex marked the file missing; nil for a file that is there.
+    var deletedAt: Int? = nil
     // Photo EXIF, on item requests: "f/1.6", "1/5", and ISO as a string. Lenient, as every video shares this type.
     var make: PlexLenientText? = nil
     var model: PlexLenientText? = nil

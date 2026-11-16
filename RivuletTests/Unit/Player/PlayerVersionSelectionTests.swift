@@ -56,6 +56,35 @@ final class PlayerVersionSelectionTests: XCTestCase {
         XCTAssertEqual(viewModel(try sweeneyTodd(), picked: "22249").upNextVersionChoice(), .matchingTier(480))
     }
 
+    /// Two copies of one episode: a 1080p file Plex marked deleted and a lower-bitrate 1080p file that is there.
+    private func episode(deletedHigh: Bool, deletedLow: Bool) throws -> PlexMetadata {
+        func media(_ id: Int, _ bitrate: Int, deleted: Bool) -> String {
+            let flag = deleted ? ",\"deletedAt\":1763000000" : ""
+            return #"{"id":\#(id),"videoResolution":"1080","height":1080,"bitrate":\#(bitrate)\#(flag),"Part":[{"id":\#(id),"key":"/library/parts/\#(id)/a.mkv","Stream":[{"id":\#(id),"streamType":1,"codec":"hevc","height":1080}]}]}"#
+        }
+        let json = #"{"ratingKey":"153525","type":"episode","title":"S03E03","Media":["#
+            + media(1, 30000, deleted: deletedHigh) + "," + media(2, 8000, deleted: deletedLow) + "]}"
+        return try JSONDecoder().decode(PlexMetadata.self, from: Data(json.utf8))
+    }
+
+    func test_init_skipsADeletedHighBitrateCopy() throws {
+        let vm = viewModel(try episode(deletedHigh: true, deletedLow: false))
+        XCTAssertEqual(vm.playingMediaID, "2")
+        XCTAssertEqual(vm.playingMediaServerIndex, 1)
+    }
+
+    func test_init_withEveryCopyDeleted_keepsTheUsualOrder() throws {
+        let vm = viewModel(try episode(deletedHigh: true, deletedLow: true))
+        XCTAssertEqual(vm.playingMediaID, "1")
+        XCTAssertEqual(vm.playingMediaServerIndex, 0)
+    }
+
+    func test_init_withNoDeletedCopy_playsTheHighestBitrate() throws {
+        let vm = viewModel(try episode(deletedHigh: false, deletedLow: false))
+        XCTAssertEqual(vm.playingMediaID, "1")
+        XCTAssertEqual(vm.playingMediaServerIndex, 0)
+    }
+
     private func providerViewModel(picked: String?) -> UniversalPlayerViewModel {
         let source = MediaSource(id: "hd", container: "mkv", duration: 100, bitrate: nil, fileSize: nil,
                                  fileName: nil, videoResolution: "1080", videoTracks: [], audioTracks: [],
