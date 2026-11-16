@@ -629,6 +629,14 @@ final class PlexNetworkManagerURLTests: XCTestCase {
         XCTAssertTrue(items.contains(URLQueryItem(name: "X-Plex-Container-Size", value: "50")))
     }
 
+    /// PMS refuses direct play of a selected non-first audio stream or an embedded
+    /// subtitle unless the profile declares both.
+    func testDirectPlaySessionProfileDeclaresStreamSelectionAndSubtitles() {
+        let extra = PlexNetworkManager.directPlaySessionProfileExtra
+        XCTAssertTrue(extra.contains("add-settings(DirectPlayStreamSelection=true)"))
+        XCTAssertTrue(extra.contains("audioCodec=*&subtitleCodec=*)"))
+    }
+
     /// A refused transcode's decision body, as PMS 1.43.5 sent it.
     func testTranscodeVerdictReadsTheServersReason() {
         let refused = #"{"MediaContainer":{"size":0,"directPlayDecisionCode":3000,"directPlayDecisionText":"App cannot direct play this item. Direct play is disabled.","generalDecisionCode":2000,"generalDecisionText":"Neither direct play nor conversion is available.","transcodeDecisionCode":4005,"transcodeDecisionText":"Cannot convert this item. No conversion profile found for protocol hls."}}"#
