@@ -2228,8 +2228,7 @@ class PlexNetworkManager: NSObject, @unchecked Sendable {
             URLQueryItem(name: "directPlay", value: "1"),
             URLQueryItem(name: "directStream", value: "0"),
             URLQueryItem(name: "X-Plex-Client-Profile-Name", value: "Generic"),
-            URLQueryItem(name: "X-Plex-Client-Profile-Extra",
-                         value: "add-direct-play-profile(type=videoProfile&protocol=http&container=*&videoCodec=*&audioCodec=*)"),
+            URLQueryItem(name: "X-Plex-Client-Profile-Extra", value: Self.directPlaySessionProfileExtra),
             URLQueryItem(name: "X-Plex-Session-Identifier", value: sessionIdentifier)
         ]
         guard let url = components.url else { return }
@@ -2237,6 +2236,15 @@ class PlexNetworkManager: NSObject, @unchecked Sendable {
         headers["X-Plex-Session-Identifier"] = sessionIdentifier
         _ = try? await requestData(url, method: "GET", headers: headers)
     }
+
+    /// The profile for the direct-play decision. Measured on PMS 1.43.4 with the `Generic` profile:
+    /// without `subtitleCodec` a selected embedded subtitle refuses direct play ("No direct play
+    /// video profile exists ... and subtitle codec ass"), and without `DirectPlayStreamSelection`
+    /// a selected audio stream that is not the file's first refuses it ("app cannot select audio
+    /// streams in direct play"). The player selects both itself, so say so.
+    static let directPlaySessionProfileExtra =
+        "add-direct-play-profile(type=videoProfile&protocol=http&container=*&videoCodec=*&audioCodec=*&subtitleCodec=*)"
+        + "+add-settings(DirectPlayStreamSelection=true)"
 
     /// Build thumbnail URL
     func buildThumbnailURL(
