@@ -332,7 +332,7 @@ struct PlexRetryRefreshTests {
         let report = try #require(pending)
         let (refreshes, continuation) = AsyncStream<[String]>.makeStream()
         let observer = NotificationCenter.default.addObserver(forName: .plexDataNeedsRefresh, object: reporter, queue: .main) { _ in
-            MainActor.assumeIsolated { continuation.yield(requests.events) }
+            MainActor.assumeIsolated { _ = continuation.yield(requests.events) }
         }
         defer {
             NotificationCenter.default.removeObserver(observer)
