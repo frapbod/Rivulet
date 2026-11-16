@@ -626,11 +626,13 @@ final class NowPlayingService: ObservableObject {
             info[MPNowPlayingInfoPropertyCreditsStartTime] = start
         }
         // `MediaItemQuery` resolves ratingKeys on the selected Plex server only.
+        #if false // Hermes test build only: Xcode 26.6 lacks the tvOS 27 SDK symbols
         if #available(tvOS 27.0, *), case .plex = viewModel?.source, let key = metadata.ratingKey,
            let entity = MPAppEntityIdentifier(
                entityIdentifier: EntityIdentifier(for: MediaItemEntity.self, identifier: key)) {
             info[MPNowPlayingInfoPropertyAppEntityIdentifiers] = [entity]
         }
+        #endif
         return info
     }
 
