@@ -75,9 +75,15 @@ nonisolated enum VersionRanking {
     /// `serverIndex` is its original position, which Plex's transcoder calls `mediaIndex`.
     static func select(_ choice: VersionChoice, in media: [PlexMedia],
                        capKbps: Int? = nil) -> (media: [PlexMedia], serverIndex: Int) {
-        guard let index = pick(choice, ids: media.map { "\($0.id)" }, keys: media.map(key), capKbps: capKbps) else {
+        // A copy Plex marked deleted (`Media@deletedAt`) answers 404 "File is missing", so never
+        // rank it, however high its bitrate. If every copy is deleted, keep the old order.
+        let present = media.indices.filter { media[$0].deletedAt == nil }
+        let candidates = present.isEmpty ? Array(media.indices) : present
+        guard let picked = pick(choice, ids: candidates.map { "\(media[$0].id)" },
+                                keys: candidates.map { key(media[$0]) }, capKbps: capKbps) else {
             return (media, 0)
         }
+        let index = candidates[picked]
         var reordered = media
         reordered.insert(reordered.remove(at: index), at: 0)
         return (reordered, index)
