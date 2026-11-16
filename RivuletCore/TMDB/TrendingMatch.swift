@@ -17,9 +17,13 @@ enum TrendingMatch {
 
     /// Movies and shows alternating, each list in TMDB's order.
     static func interleave(movies: [TMDBListItem], shows: [TMDBListItem]) -> [TMDBListItem] {
-        (0..<max(movies.count, shows.count)).flatMap { i in
-            (i < movies.count ? [movies[i]] : []) + (i < shows.count ? [shows[i]] : [])
+        // Hermes test build only: split for the Xcode 26.6 type checker.
+        var out: [TMDBListItem] = []
+        for i in 0..<max(movies.count, shows.count) {
+            if i < movies.count { out.append(movies[i]) }
+            if i < shows.count { out.append(shows[i]) }
         }
+        return out
     }
 
     /// Owned item ids (`owned` maps `key` to an item id) in trending order, each once, at most `limit`.
