@@ -439,22 +439,8 @@ enum SettingsContent {
             SettingsRowItem(id: "cat_photos",     title: "Photos",     kind: .navigation(.photos)),
             SettingsRowItem(id: "cat_servers",    title: "Servers",    kind: .navigation(.servers)),
             SettingsRowItem(id: "cache",          title: "Cache & Storage", kind: .navigation(.cache)),
-            SettingsRowItem(id: "iCloudSync",     title: "iCloud Sync",
-                            kind: .cycle(value: { iCloudSyncValue },
-                                         next: { CloudSync.shared.setEnabled(!CloudSync.shared.isEnabled) })),
             SettingsRowItem(id: "cat_about",      title: "About",      kind: .navigation(.about))
         ]
-    }
-
-    private static var iCloudSyncValue: String {
-        if CloudSync.shared.status == .on, CloudSync.shared.blockedAccountIDs.contains(PlexAuthManager.syncID) {
-            return String(localized: "iCloud has a different Plex account")
-        }
-        switch CloudSync.shared.status {
-        case .on: return String(localized: "On")
-        case .off: return String(localized: "Off")
-        case .noAccount: return String(localized: "Sign in to iCloud on this device")
-        }
     }
 
     // MARK: Photos
